@@ -56,7 +56,7 @@ export function getMetricsMetaInfo(metric) {
       getIcon() {
         return (
           <View>
-            <MaterialIcons name="direction-run" color="black" size={35}/>
+            <MaterialIcons name='directions-run' color="black" size={35}/>
 
           </View>
         )
@@ -116,7 +116,7 @@ export function getMetricsMetaInfo(metric) {
       max: 10,
       unit: 'rating',
       step: 1,
-      type: 'steppers',
+      type: 'slider',
       getIcon() {
         return (
           <View>
@@ -129,7 +129,8 @@ export function getMetricsMetaInfo(metric) {
     }
 
   }
-  return typeof metric === undefined
+  const output = metric === undefined
     ? info
     : info[metric]
+  return output;
 }
