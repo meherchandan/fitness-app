@@ -1,19 +1,28 @@
 import React, {Component} from 'react';
-import {View, TouchableOpacity, Text} from 'react-native';
+import {View, TouchableOpacity, Text, Platform, StyleSheet} from 'react-native';
 import {getMetricsMetaInfo, timeToString} from './../utils/helpers'
 import FitnessSlider from './FitnessSlider';
 import Stepper from './Stepper';
 import DateHeader from './DateHeader';
 import {Ionicons} from '@expo/vector-icons'
 import TextButton from './TextButton';
+import {submitEntry, removeEntry} from './../utils/api';
+import {connect} from 'react-redux';
+import {receiveEntries, addEntry} from './../actions';
+import {getDailyReminderValue} from './../utils/helpers';
+import {purple, white} from './../utils/colors'
 function SubmitBtn({onPress}) {
     return (
-        <TouchableOpacity onPress={onPress}>
-            <Text>SUBMIT</Text>
+        <TouchableOpacity
+            onPress={onPress}
+            style={Platform.OS == 'ios'
+            ? styles.iosSubmitBtn
+            : styles.androidSubmitBtn}>
+            <Text style={styles.submitBtnText}>SUBMIT</Text>
         </TouchableOpacity>
     )
 }
-export default class AddEntry extends Component {
+class AddEntry extends Component {
     state = {
         run: 0,
         bike: 0,
@@ -54,33 +63,45 @@ export default class AddEntry extends Component {
     submit = () => {
         const key = timeToString();
         const entry = this.state;
-        //update redux
+        this
+            .props
+            .dispatch(addEntry({[key]: entry}));
+        submitEntry({key, entry});
         this.setState({run: 0, bike: 0, swim: 0, sleep: 0, eat: 0});
-        //navigate to home, save to db, clear local notification
+        //navigate to home,, clear local notification
 
     }
     reset = () => {
         const key = timeToString();
-        //update to redux navigate to home, save to db, clear local notification
+        removeEntry(key);
+        this
+            .props
+            .dispatch(addEntry({[key]: getDailyReminderValue()}))
+        //update to redux navigate to home,  clear local notification
     }
     render() {
         const metaInfo = getMetricsMetaInfo();
-        if (true) {
+        if (this.props.alreadyLogged) {
             return (
-                <View>
-                    <Ionicons name="ios-happy" size={100}/>
+                <View style={styles.center}>
+                    <Ionicons
+                        name={Platform.OS == 'ios'
+                        ? "ios-happy"
+                        : "md-happy"}size={100}/>
                     <Text>You already logged your information for today</Text>
-                    <TextButton onPress={this.reset}>
+                    <TextButton
+                        style={{
+                        padding: 10
+                    }}
+                        onPress={this.reset}>
                         Reset
                     </TextButton>
                 </View>
             )
         }
         return (
-            <View>
+            <View style={styles.container}>
                 <DateHeader date={(new Date()).toLocaleDateString()}></DateHeader>
-                <Text>{JSON.stringify(this.state)}
-                </Text>
                 {Object
                     .keys(metaInfo)
                     .map((key) => {
@@ -91,7 +112,7 @@ export default class AddEntry extends Component {
                         } = metaInfo[key];
                         const value = this.state[key];
                         return (
-                            <View key={key}>
+                            <View key={key} style={styles.row}>
                                 {getIcon()}
                                 {type === "slider"
                                     ? <FitnessSlider
@@ -112,3 +133,53 @@ export default class AddEntry extends Component {
         )
     }
 }
+const mapStateToProps = (state, ownProps) => {
+    const key = timeToString();
+    return {
+        alreadyLogged: state[key] && state[key].today == undefined
+    }
+}
+const styles = StyleSheet.create({
+    container: {
+        flex: 1,
+        padding: 20,
+        backgroundColor: white
+    },
+    iosSubmitBtn: {
+        backgroundColor: purple,
+        padding: 10,
+        borderRadius: 7,
+        height: 45,
+        marginLeft: 40,
+        marginRight: 40
+    },
+    androidSubmitBtn: {
+        backgroundColor: purple,
+        padding: 10,
+        paddingLeft: 30,
+        paddingRight: 30,
+        borderRadius: 2,
+        height: 45,
+        alignSelf: "flex-end",
+        justifyContent: "center",
+        alignItems: "center"
+    },
+    submitBtnText: {
+        color: white,
+        fontSize: 22,
+        textAlign: "center"
+    },
+    row: {
+        flexDirection: "row",
+        flex: 1,
+        alignItems: "center"
+    },
+    center: {
+        flex: 1,
+        justifyContent: "center",
+        alignItems: "center",
+        marginRight: 30,
+        marginLeft: 30
+    }
+})
+export default connect(mapStateToProps)(AddEntry)
