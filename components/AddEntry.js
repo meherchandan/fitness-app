@@ -1,6 +1,6 @@
 import React, {Component} from 'react';
 import {View, TouchableOpacity, Text, Platform, StyleSheet} from 'react-native';
-import {getMetricsMetaInfo, timeToString} from './../utils/helpers'
+import {getMetricMetaInfo, timeToString} from './../utils/helpers'
 import FitnessSlider from './FitnessSlider';
 import Stepper from './Stepper';
 import DateHeader from './DateHeader';
@@ -31,7 +31,7 @@ class AddEntry extends Component {
         eat: 0
     }
     increment = (metric) => {
-        const {max, step} = getMetricsMetaInfo(metric);
+        const {max, step} = getMetricMetaInfo(metric);
         this.setState((state) => {
             const count = state[metric] + step;
             return {
@@ -47,7 +47,7 @@ class AddEntry extends Component {
         this.setState(() => ({[metric]: value}))
     }
     decrement = (metric) => {
-        const {step} = getMetricsMetaInfo(metric);
+        const {step} = getMetricMetaInfo(metric);
         this.setState((state) => {
             const count = state[metric] - step;
             return {
@@ -80,7 +80,7 @@ class AddEntry extends Component {
         //update to redux navigate to home,  clear local notification
     }
     render() {
-        const metaInfo = getMetricsMetaInfo();
+        const metaInfo = getMetricMetaInfo();
         if (this.props.alreadyLogged) {
             return (
                 <View style={styles.center}>

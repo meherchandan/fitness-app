@@ -8,7 +8,7 @@ import UdaciFitnessCalendar from 'udacifitness-calendar';
 import {white} from './../utils/colors';
 import DateHeader from './DateHeader';
 import MetricCard from './MetricCard'
-import AppLoading from 'expo';
+import {AppLoading} from 'expo';
 class History extends Component {
     state = {
         ready: false
@@ -21,7 +21,7 @@ class History extends Component {
                     [timeToString()]: getDailyReminderValue()
                 }))
             }
-        })
+        }).then(() => this.setState(() => ({ready: true})))
 
     }
     renderItem = ({
